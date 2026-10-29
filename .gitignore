@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+.env
+.data/
+*.log
+.DS_Store
+
+# LangGraph API
+.langgraph_api
