@@ -1,49 +1,30 @@
 {
-  "name": "langchain-developer-research-assistant",
+  "name": "langchain-learning",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@10.20.0",
+  "packageManager": "pnpm@9.15.4",
   "engines": {
     "node": ">=22"
   },
   "scripts": {
-    "dev": "tsx src/cli.ts",
-    "server": "langgraphjs dev --port 2024 --no-browser",
-    "start": "node dist/cli.js",
-    "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "eval": "vitest run tests/evaluation.test.ts",
-    "smoke": "tsx scripts/smoke.ts",
-    "lint": "eslint .",
-    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
+    "overview": "tsx src/examples/01-overview.ts",
+    "agents": "tsx src/examples/02-agents.ts",
+    "messages": "tsx src/examples/03-messages.ts"
   },
   "dependencies": {
-    "@inkjs/ui": "^2.0.0",
-    "@langchain/core": "^1.1.0",
-    "@langchain/langgraph": "^1.0.0",
-    "@langchain/langgraph-checkpoint": "^1.2.1",
-    "@langchain/ollama": "^1.0.0",
+    "@langchain/core": "^1.3.2",
+    "@langchain/langgraph": "^1.5.3",
+    "@langchain/ollama": "^1.3.0",
     "@langchain/openai": "^1.8.0",
-    "cheerio": "^1.1.2",
-    "dotenv": "^17.2.3",
-    "ink": "^8.0.0",
-    "langchain": "^1.1.0",
-    "react": "^19.3.1",
-    "zod": "^4.1.12"
+    "dotenv": "^18.0.9",
+    "langchain": "^1.6.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
-    "@langchain/langgraph-cli": "^1.5.6",
-    "@types/node": "^22.19.0",
-    "@types/react": "^19.3.0",
-    "eslint": "^9.39.1",
-    "ink-testing-library": "^4.0.0",
-    "tsx": "^4.20.6",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.4",
-    "vitest": "^4.0.6"
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
   }
 }

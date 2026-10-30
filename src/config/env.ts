@@ -11,12 +11,6 @@ const envSchema = z.object({
   OPENAI_API_KEY: z.string().min(1).optional(),
   MODEL_TEMPERATURE: z.coerce.number().min(0).max(2).default(0),
   MODEL_TIMEOUT_MS: z.coerce.number().int().positive().default(60_000),
-  SEARCH_PROVIDER: z.enum(["manual", "brave", "tavily"]).default("manual"),
-  BRAVE_SEARCH_API_KEY: z.string().optional(),
-  TAVILY_API_KEY: z.string().optional(),
-  TRACE_DIR: z.string().min(1).default(".data/traces"),
-  FETCH_TIMEOUT_MS: z.coerce.number().int().positive().default(10_000),
-  FETCH_MAX_BYTES: z.coerce.number().int().positive().default(1_000_000),
 });
 
 export type AppConfig = z.infer<typeof envSchema>;
