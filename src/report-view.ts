@@ -1,4 +1,3 @@
-import { parsePartialJson } from "@langchain/core/output_parsers";
 import type { StructuredResearchReport } from "./schemas/research-report.js";
 
 const SECTION_LABELS: Record<string, string> = {
@@ -57,9 +56,8 @@ export function renderReport(report: object, complete: boolean): string {
   return lines.join("\n");
 }
 
-/** Prints a report while its tool-call arguments stream in, appending only the new text. */
+/** Prints a report while it streams in, appending only the new text. */
 export class LiveReport {
-  #args = "";
   #printed = "";
   readonly #write: (text: string) => void;
 
@@ -67,25 +65,16 @@ export class LiveReport {
     this.#write = write;
   }
 
-  push(argsDelta: string): void {
-    this.#args += argsDelta;
-    const partial: unknown = parsePartialJson(this.#args);
-    if (partial && typeof partial === "object") this.#emit(renderReport(partial, false));
-  }
-
-  finish(report: unknown): void {
-    if (!report || typeof report !== "object") return;
-    const text = renderReport(report, true);
-    if (text.startsWith(this.#printed)) this.#emit(text);
-    else this.#write(`\n${text}`);
-    this.#printed = text;
-  }
-
-  #emit(text: string): void {
-    // A partial parse that would rewrite already printed text waits for more input.
-    if (!text.startsWith(this.#printed)) return;
-    this.#write(text.slice(this.#printed.length));
-    this.#printed = text;
+  update(report: object, complete: boolean): void {
+    const text = renderReport(report, complete);
+    if (text.startsWith(this.#printed)) {
+      this.#write(text.slice(this.#printed.length));
+      this.#printed = text;
+    } else if (complete) {
+      this.#write(`\n${text}`);
+      this.#printed = text;
+    }
+    // Otherwise a partial parse would rewrite printed text; wait for more input.
   }
 }
 

@@ -11,7 +11,7 @@
 - `invoke` 类似一次性 JSON 请求；`stream` 类似逐块消费 SSE。
 - Prompt 是运行时上下文，不是安全边界，也不是模型训练。
 
-运行时切换模型不需要重建 Agent：`createModelSwitchMiddleware` 在 `wrapModelCall` 里按 `context.model` 换掉 `request.model`，调用方用 `agent.streamEvents(input, { context: { model } })` 传入。消息历史存在 checkpointer 里、与供应商无关，所以同一个 thread 换模型后仍能接着聊。可选模型是 `.env` 里 `MODEL_OPTIONS` 的白名单，`context` 来自调用方，不能让它指定任意模型。CLI 的 `/model` 就是这样实现的。
+运行时切换模型不需要重建 Agent：`createModelSwitchMiddleware` 在 `wrapModelCall` 里按 `context.model` 换掉 `request.model`，调用方用 `agent.streamEvents(input, { context: { model } })` 传入。消息历史存在 checkpointer 里、与供应商无关，所以同一个 thread 换模型后仍能接着聊。可选模型是 `.env` 里 `MODEL_OPTIONS` 的白名单，`context` 来自调用方，不能让它指定任意模型。终端界面的 `Ctrl+P` 模型选择框就是这样实现的。
 
 代码入口：`src/config/model.ts`、`src/agent/model-switch.ts`、`src/cli.ts`。
 
@@ -69,7 +69,7 @@ Agent 是循环，不是单次 prompt：模型提出 tool call，程序执行并
 
 Checkpoint 保存 thread 的图状态；长期用户记忆是另一个问题，不应把所有历史无限塞入 prompt。Interrupt 让图在副作用前暂停，`Command` 在同一 thread 中恢复。
 
-代码入口：`src/cli.ts` 中的 `thread_id`、`Command` 和 approval loop。
+代码入口：`src/session/research-session.ts` 中的 `thread_id`、`Command` 和 approval loop。
 
 练习：分别批准和拒绝同一 URL；使用 `/new` 比较新旧 thread。
 

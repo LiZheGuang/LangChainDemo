@@ -9,6 +9,7 @@
   },
   "scripts": {
     "dev": "tsx src/cli.ts",
+    "dev:plain": "tsx src/cli.ts --plain",
     "server": "langgraphjs dev --port 2024 --no-browser",
     "start": "node dist/cli.js",
     "build": "tsc -p tsconfig.build.json",
@@ -21,7 +22,6 @@
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
   },
   "dependencies": {
-    "@inkjs/ui": "^2.0.0",
     "@langchain/core": "^1.1.0",
     "@langchain/langgraph": "^1.0.0",
     "@langchain/langgraph-checkpoint": "^1.2.1",

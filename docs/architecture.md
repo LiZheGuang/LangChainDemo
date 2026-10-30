@@ -2,18 +2,20 @@
 
 ## 数据流
 
-1. `src/cli.ts` 把用户输入和 `thread_id` 交给 Agent。
+1. `src/cli.ts` 在 TTY 中启动 Ink 终端界面（`src/tui`），否则退回纯文本模式（`src/plain-cli.ts`）。两者都调用 `src/session/research-session.ts` 的 `runTurn`，把用户输入、`thread_id` 和所选模型交给 Agent，并以事件（文本、报告快照、工具开始/结束）回传给界面。
 2. `createAgent` 让模型决定直接回答或调用工具。
 3. calculator/current_time 直接执行；web_search/fetch_page 先被 HITL middleware 中断。
-4. CLI 将 approve/reject 包装为 `Command`，使用同一个 `thread_id` 恢复。
+4. `runTurn` 通过 `approve` 回调向界面要审批结果，再包装为 `Command`，使用同一个 `thread_id` 恢复。
 5. `MemorySaver` 保存 thread 内消息和中断状态。
-6. CLI 使用 `createStructuredResearchAgent`：模型通过 `toolStrategy` 生成的 `ResearchReport` 工具提交最终报告，Zod 校验后放在 `structuredResponse` 里，由 CLI 格式化打印；工具调用过程仍通过 `streamEvents` 实时显示。随后核对报告中的链接是否被工具实际搜索或读取过；本地 trace 写入 `.data/traces`。Agent Server 和 Web UI 用的 `createResearchAgent` 仍输出逐 token 流式的 Markdown。
+6. CLI 使用 `createStructuredResearchAgent`：模型通过 `toolStrategy` 生成的 `ResearchReport` 工具提交最终报告，Zod 校验后放在 `structuredResponse` 里；生成过程中 `runTurn` 用 `parsePartialJson` 把工具参数片段解析成报告快照，界面据此边生成边渲染。随后核对报告中的链接是否被工具实际搜索或读取过；本地 trace 写入 `.data/traces`。Agent Server 和 Web UI 用的 `createResearchAgent` 仍输出逐 token 流式的 Markdown。
 
 ## 模块边界
 
 - `config`：环境变量和模型供应商适配。业务代码不直接实例化 Ollama。
 - `tools`：小而独立的能力，输入均由 Zod 描述。
 - `agent`：提示词、工具和 middleware 的组装层；`model-switch` 按 `context.model` 在每次模型调用前换模型（白名单来自 `MODEL_OPTIONS`）。
+- `session`：一轮对话的运行逻辑（流式事件、审批、来源核对、trace），不依赖任何界面。
+- `tui`：Ink 终端界面；`turn-state` 是把事件归并为显示状态的纯函数，组件只负责渲染。
 - `memory`：与会话相关但不依赖终端 UI 的状态。
 - `schemas`：最终答案的两种契约——结构化输出的 Zod schema（CLI），以及 Markdown 四个小节的约定和解析器（Web UI、评测）。
 - `observability`：可替换的追踪层，当前为脱敏 JSONL。

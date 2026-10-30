@@ -34,7 +34,7 @@ MODEL_NAME=qwen3:4b
 OLLAMA_BASE_URL=http://127.0.0.1:11434
 ```
 
-想在 CLI 运行中切换模型，把可选模型写进 `MODEL_OPTIONS`（逗号分隔；不带前缀用 `MODEL_PROVIDER`，跨供应商写 `ollama:qwen3:4b`），然后用 `/model` 切换，当前会话保留：
+想在运行中切换模型，把可选模型写进 `MODEL_OPTIONS`（逗号分隔；不带前缀用 `MODEL_PROVIDER`，跨供应商写 `ollama:qwen3:4b`），然后在终端界面按 `Ctrl+P` 用方向键选择，当前会话保留：
 
 ```dotenv
 MODEL_OPTIONS=glm-5.3,glm-5.3-flash,qwen3.8-max
@@ -42,16 +42,19 @@ MODEL_OPTIONS=glm-5.3,glm-5.3-flash,qwen3.8-max
 
 较小的模型可能无法稳定调用工具：CLI 的最终报告靠模型调用 `ResearchReport` 工具提交（结构化输出），Web UI 则要求模型按约定的四个 Markdown 小节作答。
 
-## CLI 命令
+## 终端界面
 
-- `/new`：新建会话
-- `/history`：查看当前 thread 的消息状态
-- `/sources`：查看本轮收集的去重来源
-- `/model`：查看可选模型；`/model <名称>` 切换模型，当前会话保留
-- `/help`：查看命令
-- `/exit`：退出
+`pnpm dev` 打开全屏终端界面（Ink）：研究报告以卡片形式边生成边显示，关键点用颜色区分“事实 / 推断”，工具调用显示状态与结果。
 
-当 Agent 要调用 `web_search` 或 `fetch_page` 时，CLI 会显示参数并等待批准。计算和获取时间不需要批准。
+| 操作 | 方式 |
+| --- | --- |
+| 切换模型 | `Ctrl+P`，或输入 `/model`；↑↓ 或数字键选择，Enter 确认，Esc 取消 |
+| 新会话 | `Ctrl+N` 或 `/new` |
+| 命令菜单 | 输入 `/`，↑↓ 选择 `/history`、`/sources`、`/help`、`/exit` 等 |
+| 审批外部请求 | `web_search` / `fetch_page` 会弹出批准 / 拒绝选择框 |
+| 退出 | `Ctrl+C` |
+
+管道输入（非 TTY）或 `pnpm dev:plain` 会使用逐行的纯文本模式，命令相同，`/model <名称>` 直接切换。
 
 ## 可选搜索服务
 
@@ -87,7 +90,7 @@ pnpm check
 ## 推荐练习
 
 1. 运行 `pnpm dev`，先问一个不需要工具的问题。
-2. 问“6 的 7 次方是多少”，观察 tool call：终端会先打印 `[工具] calculator {...}` 和 `[结果] ...`，再逐字输出答案；随后输入 `/history`，看到 `[ai] → 调用 calculator`、`[tool]`、`[ai]` 三条消息，这就是一次完整的 Agent 循环。工具调用也会写入 `.data/traces/<thread_id>.jsonl`。
+2. 问“6 的 7 次方是多少”，观察 tool call：界面会先显示 `✓ 计算 {...}` 和结果，再边生成边显示报告卡片；随后输入 `/history`，看到 `[ai] → 调用 calculator`、`[tool]`、`[ai]` 三条消息，这就是一次完整的 Agent 循环。工具调用也会写入 `.data/traces/<thread_id>.jsonl`。
 3. 提供一个公开技术文档 URL，批准访问后检查 `/sources`。
 4. 继续追问，使用 `/history` 理解 `thread_id` 和 checkpoint。
 5. 阅读 [`docs/learning-log.md`](docs/learning-log.md)，完成每阶段复盘题。

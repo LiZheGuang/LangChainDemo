@@ -1,3 +1,4 @@
+import { parsePartialJson } from "@langchain/core/output_parsers";
 import { describe, expect, it } from "vitest";
 import { LiveReport, renderReport } from "../src/report-view.js";
 
@@ -47,8 +48,13 @@ describe("LiveReport", () => {
   it("only appends while arguments stream in character by character", () => {
     const chunks: string[] = [];
     const live = new LiveReport((chunk) => chunks.push(chunk));
-    for (const char of JSON.stringify(report)) live.push(char);
-    live.finish(report);
+    let args = "";
+    for (const char of JSON.stringify(report)) {
+      args += char;
+      const partial: unknown = parsePartialJson(args);
+      if (partial && typeof partial === "object") live.update(partial, false);
+    }
+    live.update(report, true);
 
     expect(chunks.length).toBeGreaterThan(10);
     expect(chunks.join("")).toBe(expected);
@@ -57,8 +63,9 @@ describe("LiveReport", () => {
   it("reprints the report when the final arguments disagree with the streamed prefix", () => {
     const chunks: string[] = [];
     const live = new LiveReport((chunk) => chunks.push(chunk));
-    live.push('{"summary":"旧结论"');
-    live.finish({ summary: "新结论" });
+    live.update({ summary: "旧结论" }, false);
+    live.update({ summary: "新结论" }, false);
+    live.update({ summary: "新结论" }, true);
 
     expect(chunks.join("")).toBe("结论：旧结论\n结论：新结论");
   });
